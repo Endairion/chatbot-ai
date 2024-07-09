@@ -1,0 +1,6 @@
+/venv
+.env
+/src/__pycache__
+/src/chatbot_app/__pycache__
+RAG Flow
+TODO
