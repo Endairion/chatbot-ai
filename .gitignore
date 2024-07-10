@@ -1,4 +1,4 @@
-/venv
+/.venv
 .env
 /src/__pycache__
 /src/chatbot_app/__pycache__
