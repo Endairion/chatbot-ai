@@ -3,9 +3,10 @@ aiohttp==3.9.5
 fastapi==0.111.0
 langchain==0.2.7
 langchain_community==0.2.7
-langchain_openai==0.1.14
+langchain_huggingface==0.0.3
+langchain_openai==0.1.15
 langchain_text_splitters==0.2.2
-llama_index==0.10.53
+llama_index==0.10.54
 llama_parse==0.4.6
 pydantic==2.8.2
 python-dotenv==1.0.1
