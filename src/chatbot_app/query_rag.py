@@ -3,8 +3,7 @@ from typing import List
 from langchain.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 from langchain_community.vectorstores import Chroma
-# from chatbot_app.embedding_function import get_embedding_function
-from embedding_function import get_embedding_function
+from chatbot_app.embedding_function import get_embedding_function
 from dotenv import load_dotenv
 import json
 import os
