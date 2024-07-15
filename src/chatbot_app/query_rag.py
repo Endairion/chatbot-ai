@@ -3,7 +3,8 @@ from typing import List
 from langchain.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 from langchain_community.vectorstores import Chroma
-from chatbot_app.embedding_function import get_embedding_function
+# from chatbot_app.embedding_function import get_embedding_function
+from embedding_function import get_embedding_function
 from dotenv import load_dotenv
 import json
 import os
@@ -36,8 +37,7 @@ def query_rag(query_text: str) -> QueryResponse:
 
     # Search the DB.
     results = db.similarity_search_with_score(query_text, k=5)
-    if len(results) == 0 or results[0][1] < 0.5:
-        print(results[0][1])
+    if len(results) == 0:
         print("Unable to find matching results.")
         return
 
@@ -60,3 +60,7 @@ def query_rag(query_text: str) -> QueryResponse:
         response_text=response_text,
         sources=sources
     )
+
+if __name__ == "__main__":
+    query_text = ""
+    query_rag(query_text)
