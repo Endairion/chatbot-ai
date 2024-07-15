@@ -5,6 +5,7 @@ from langchain.schema.document import Document
 from langchain_community.vectorstores import Chroma
 from langchain_text_splitters import Language, MarkdownHeaderTextSplitter
 from chatbot_app.embedding_function import get_embedding_function
+# from embedding_function import get_embedding_function
 import argparse
 import os 
 import shutil
@@ -82,7 +83,7 @@ def split_documents(documents: list[Document]):
     headers_to_split_on = [("#", "Header 1"), ("##", "Header 2"), ("###", "Header 3")]
     splitter = MarkdownHeaderTextSplitter(
         headers_to_split_on=headers_to_split_on, 
-        return_each_line=True, 
+        return_each_line=False, 
         strip_headers=False)
     
     document= splitter.split_documents(documents)

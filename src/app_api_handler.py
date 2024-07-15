@@ -8,8 +8,16 @@ from fastapi import FastAPI
 from chatbot_app.query_rag import QueryResponse, query_rag
 from chatbot_app.populate_database import populate
 from chatbot_app.download_pdf import process_attachments
-
+from starlette.middleware.cors import CORSMiddleware
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=['*'],
+    allow_credentials=False,
+    allow_methods=['*'],
+    allow_headers=['*'],
+)
 
 class SubmitQueryRequest(BaseModel):
     query_text: str

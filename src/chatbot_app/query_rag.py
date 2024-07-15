@@ -4,6 +4,7 @@ from langchain.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 from langchain_community.vectorstores import Chroma
 from chatbot_app.embedding_function import get_embedding_function
+from embedding_function import get_embedding_function
 from dotenv import load_dotenv
 import json
 import os
@@ -61,5 +62,5 @@ def query_rag(query_text: str) -> QueryResponse:
     )
 
 if __name__ == "__main__":
-    query_text = ""
+    query_text = "How to apply halal certification?"
     query_rag(query_text)
