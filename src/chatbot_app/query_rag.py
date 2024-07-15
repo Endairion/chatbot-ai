@@ -46,27 +46,22 @@ def query_rag(query_text: str) -> QueryResponse:
     context_text = "\n\n---\n\n".join([doc.page_content for doc, _score in results])
     prompt_template = ChatPromptTemplate.from_template(PROMPT_TEMPLATE)
     prompt = prompt_template.format(context=context_text, question=query_text)
-    # Dereference prompt_template as it's no longer needed
-    prompt_template = None
 
     model = ChatOpenAI(model="ft:gpt-3.5-turbo-0125:personal::9hUiZayg", temperature=0)
     response = model.invoke(prompt)
-    # Dereference model as it's no longer needed
-    model = None
+
 
     sources = [doc.metadata.get("id", None) for doc, _score in results]
     response_text = response.content
 
     formatted_response = f"Response: {response_text}\nSources: {sources}"
     print(formatted_response)
-    # Dereference formatted_response as it's no longer needed
-    formatted_response = None
 
-    # Assuming db has a close or cleanup method (pseudocode, as it depends on the actual implementation)
-    # if hasattr(db, 'close'):
-    #     db.close()
-    # Alternatively, just dereference db
-    db = None
+    del db
+    del model
+    del results
+    del context_text
+    del prompt_template
 
     return QueryResponse(
         query_text=query_text,
