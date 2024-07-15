@@ -4,8 +4,8 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.schema.document import Document
 from langchain_community.vectorstores import Chroma
 from langchain_text_splitters import Language, MarkdownHeaderTextSplitter
-# from chatbot_app.embedding_function import get_embedding_function
-from embedding_function import get_embedding_function
+from chatbot_app.embedding_function import get_embedding_function
+# from embedding_function import get_embedding_function
 import argparse
 import os 
 import shutil
@@ -16,9 +16,9 @@ from llama_index.core import SimpleDirectoryReader
 
 load_dotenv()
 
-NEW_DATA_PATH = 'src/data/source/new'
-OLD_DATA_PATH = 'src/data/source/old'
-DB_PATH = 'src/data/chroma'
+NEW_DATA_PATH = 'data/source/new'
+OLD_DATA_PATH = 'data/source/old'
+DB_PATH = 'data/chroma'
 LLAMA_CLOUD_API_KEY = os.getenv("LLAMA_CLOUD_API_KEY")
 OPEN_API_KEY = os.getenv("OPENAI_API_KEY")
 
