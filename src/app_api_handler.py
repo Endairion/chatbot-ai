@@ -13,7 +13,7 @@ from starlette.middleware.cors import CORSMiddleware
 app = FastAPI()
 
 class GCMiddleware:
-    def __init__(self, app: FastAPI, threshold: int = 5):
+    def __init__(self, app: FastAPI, threshold: int = 1):
         self.app = app
         self.threshold = threshold
         self.request_count = 0
