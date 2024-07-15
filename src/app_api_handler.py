@@ -27,7 +27,7 @@ class GCMiddleware:
             print("Garbage collection triggered")
         return response
 
-app.add_middleware(GCMiddleware, threshold=5)
+app.add_middleware(GCMiddleware)
 
 app.add_middleware(
     CORSMiddleware,
