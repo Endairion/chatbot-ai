@@ -4,8 +4,8 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.schema.document import Document
 from langchain_community.vectorstores import Chroma
 from langchain_text_splitters import Language, MarkdownHeaderTextSplitter
-from chatbot_app.embedding_function import get_embedding_function
-# from embedding_function import get_embedding_function
+# from chatbot_app.embedding_function import get_embedding_function
+from embedding_function import get_embedding_function
 import argparse
 import os 
 import shutil
@@ -16,9 +16,9 @@ from llama_index.core import SimpleDirectoryReader
 
 load_dotenv()
 
-NEW_DATA_PATH = 'data/source/new'
-OLD_DATA_PATH = 'data/source/old'
-DB_PATH = 'data/chroma'
+NEW_DATA_PATH = 'src/data/source/new'
+OLD_DATA_PATH = 'src/data/source/old'
+DB_PATH = 'src/data/chroma'
 LLAMA_CLOUD_API_KEY = os.getenv("LLAMA_CLOUD_API_KEY")
 OPEN_API_KEY = os.getenv("OPENAI_API_KEY")
 
@@ -40,7 +40,9 @@ def parse_documents():
         result_type="markdown",
         gpt4o_mode=True,
         gpt4o_api_key=OPEN_API_KEY,
-        parsing_instructions="Do not parse any photos, images, logs, or screenshots. Only parse texts."
+        parsing_instructions="Do not parse any photos, images, logs, or screenshots. Only parse texts.",
+        invalidate_cache=True,
+        do_not_cache=True,
     )
     
     fileExtractor = {".pdf": parser}
@@ -50,7 +52,7 @@ def parse_documents():
     new_documents = []
     filename = None
     content = None
-    counter = 0
+
     for document in documents:
         if filename is None:
             filename = document.metadata["file_name"]
@@ -60,7 +62,7 @@ def parse_documents():
         else:
             new_documents.append(Document(page_content=content, metadata={"filename": filename}))
             filename = None
-
+            
     new_documents.append(Document(page_content=content, metadata={"filename": filename}))
 
     # Ensure the OLD_DATA_PATH directory exists
