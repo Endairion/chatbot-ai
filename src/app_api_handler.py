@@ -3,13 +3,32 @@ import aiohttp
 import uvicorn
 import os
 import aiofiles
+import gc
 from pydantic import BaseModel
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from chatbot_app.query_rag import QueryResponse, query_rag
 from chatbot_app.populate_database import populate
 from chatbot_app.download_pdf import process_attachments
 from starlette.middleware.cors import CORSMiddleware
 app = FastAPI()
+
+class GCMiddleware:
+    def __init__(self, app: FastAPI, threshold: int = 1):
+        self.app = app
+        self.threshold = threshold
+        self.request_count = 0
+
+    async def __call__(self, scope, receive, send):
+        if scope['type'] == 'http':
+            self.request_count += 1
+            if self.request_count >= self.threshold:
+                gc.collect()
+                self.request_count = 0
+                print("Garbage collection triggered")
+
+        await self.app(scope, receive, send)
+
+app.add_middleware(GCMiddleware)
 
 app.add_middleware(
     CORSMiddleware,
