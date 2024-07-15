@@ -13,21 +13,22 @@ from starlette.middleware.cors import CORSMiddleware
 app = FastAPI()
 
 class GCMiddleware:
-    def __init__(self, app: FastAPI, threshold: int = 5):
+    def __init__(self, app: FastAPI, threshold: int = 100):
         self.app = app
         self.threshold = threshold
         self.request_count = 0
 
-    async def __call__(self, request: Request, call_next):
-        response = await call_next(request)
-        self.request_count += 1
-        if self.request_count >= self.threshold:
-            gc.collect()
-            self.request_count = 0
-            print("Garbage collection triggered")
-        return response
+    async def __call__(self, scope, receive, send):
+        if scope['type'] == 'http':
+            self.request_count += 1
+            if self.request_count >= self.threshold:
+                gc.collect()
+                self.request_count = 0
+                print("Garbage collection triggered")
 
-app.add_middleware(GCMiddleware, threshold=5)
+        await self.app(scope, receive, send)
+
+app.add_middleware(GCMiddleware)
 
 app.add_middleware(
     CORSMiddleware,
