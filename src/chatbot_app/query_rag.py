@@ -3,6 +3,7 @@ from typing import List
 from langchain.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 from langchain_community.vectorstores import Chroma
+import gc
 from chatbot_app.embedding_function import get_embedding_function
 # from embedding_function import get_embedding_function
 from dotenv import load_dotenv
@@ -30,6 +31,7 @@ class QueryResponse:
     response_text: str
     sources: List[str]
 
+
 def query_rag(query_text: str) -> QueryResponse:
     # Prepare the DB.
     embedding_function = get_embedding_function()
@@ -44,20 +46,32 @@ def query_rag(query_text: str) -> QueryResponse:
     context_text = "\n\n---\n\n".join([doc.page_content for doc, _score in results])
     prompt_template = ChatPromptTemplate.from_template(PROMPT_TEMPLATE)
     prompt = prompt_template.format(context=context_text, question=query_text)
-    print(prompt)
+    # Dereference prompt_template as it's no longer needed
+    prompt_template = None
 
     model = ChatOpenAI(model="ft:gpt-3.5-turbo-0125:personal::9hUiZayg", temperature=0)
     response = model.invoke(prompt)
+    # Dereference model as it's no longer needed
+    model = None
 
     sources = [doc.metadata.get("id", None) for doc, _score in results]
-    # Convert the AIMessage object to a JSON string
     response_text = response.content
 
     formatted_response = f"Response: {response_text}\nSources: {sources}"
     print(formatted_response)
+    # Dereference formatted_response as it's no longer needed
+    formatted_response = None
+
+    # Assuming db has a close or cleanup method (pseudocode, as it depends on the actual implementation)
+    # if hasattr(db, 'close'):
+    #     db.close()
+    # Alternatively, just dereference db
+    db = None
+
     return QueryResponse(
         query_text=query_text,
         response_text=response_text,
         sources=sources
     )
+
 
