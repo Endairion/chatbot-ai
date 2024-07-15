@@ -29,6 +29,8 @@ def index():
 @app.post("/submit_query")
 def submit_query(request: SubmitQueryRequest) -> QueryResponse:
     response = query_rag(request.query_text)
+    collected = gc.collect()
+    print(f"Garbage collection triggered after /submit_query: {collected} objects collected")
     return response
 
 @app.get("/update")
