@@ -49,8 +49,6 @@ def query_rag(query_text: str) -> QueryResponse:
 
     model = ChatOpenAI(model="ft:gpt-3.5-turbo-0125:personal::9hUiZayg", temperature=0)
     response = model.invoke(prompt)
-
-
     sources = [doc.metadata.get("id", None) for doc, _score in results]
     response_text = response.content
 
@@ -62,6 +60,9 @@ def query_rag(query_text: str) -> QueryResponse:
     del results
     del context_text
     del prompt_template
+    del embedding_function
+    gc.collect()
+
 
     return QueryResponse(
         query_text=query_text,
