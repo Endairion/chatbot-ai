@@ -1,15 +1,12 @@
-import asyncio
-import aiohttp
-import uvicorn
-import os
-import aiofiles
 import gc
+import uvicorn
 from pydantic import BaseModel
 from fastapi import FastAPI, Request
-from chatbot_app.query_rag import QueryResponse, query_rag
-from chatbot_app.populate_database import populate
-from chatbot_app.download_pdf import process_attachments
+from chatbot_app.RAGQuery import RAGQuery, QueryResponse
 from starlette.middleware.cors import CORSMiddleware
+
+DB_PATH = "data/chroma"
+
 app = FastAPI()
 
 class GCMiddleware:
@@ -47,18 +44,21 @@ def index():
 
 @app.post("/submit_query")
 def submit_query(request: SubmitQueryRequest) -> QueryResponse:
-    response = query_rag(request.query_text)
-    collected = gc.collect()
-    print(f"Garbage collection triggered after /submit_query: {collected} objects collected")
-    return response
+    with RAGQuery(
+        db_path = DB_PATH,
+        model_name = "intfloat/multilingual-e5-large",
+        model_kwargs = {'device': "cpu"}
+    ) as rag:
+        return rag.query(request.query_text)
+    
 
-@app.get("/update")
-def update():
-    populate()
+# @app.get("/update")
+# def update():
+#     populate()
 
-@app.get("/download")
-async def download(data):
-    await process_attachments(data)
+# @app.get("/download")
+# async def download(data):
+#     await process_attachments(data)
 
 
 
