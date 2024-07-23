@@ -56,7 +56,7 @@ class DocumentManager:
         if not os.path.exists(self.old_path):
             os.makedirs(self.old_path)
 
-            files = os.listdir(self.new_path)
+        files = os.listdir(self.new_path)
     
         for file_name in files:
             # Construct full file path

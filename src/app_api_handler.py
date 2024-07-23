@@ -1,7 +1,7 @@
 import gc
 import uvicorn
 from pydantic import BaseModel
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, BackgroundTasks
 from chatbot_app.ChromaDB import ChromaDB
 from chatbot_app.DocumentManager import DocumentManager
 from chatbot_app.EmbeddingFunction import EmbeddingFunction
@@ -36,6 +36,14 @@ app.add_middleware(
     allow_headers=['*'],
 )
 
+def process_documents():
+    docs = DocumentManager().parse_documents()
+    if not docs:
+        return None
+    splitted_docs = DocumentManager().split_documents(docs)
+    with ChromaDB() as db:
+        db.add(splitted_docs)
+
 class SubmitQueryRequest(BaseModel):
     query_text: str
 
@@ -47,14 +55,13 @@ def index():
 def submit_query(request: SubmitQueryRequest) -> QueryResponse:
     with RAGQuery() as Rag:
         response = Rag.query(request.query_text)
+        return response
     
 
 @app.get("/update")
-def update():
-    docs = DocumentManager().parse_documents()
-    splitted_docs = DocumentManager().split_documents(docs)
-    with ChromaDB() as db:
-        db.add(splitted_docs)
+def update(background_tasks: BackgroundTasks):
+    background_tasks.add_task(process_documents)
+    return {"message": "Processing started"}
 
 # @app.get("/download")
 # async def download(data):
