@@ -2,10 +2,11 @@ import gc
 import uvicorn
 from pydantic import BaseModel
 from fastapi import FastAPI, Request
+from chatbot_app.ChromaDB import ChromaDB
+from chatbot_app.DocumentManager import DocumentManager
+from chatbot_app.EmbeddingFunction import EmbeddingFunction
 from chatbot_app.RAGQuery import RAGQuery, QueryResponse
 from starlette.middleware.cors import CORSMiddleware
-
-DB_PATH = "data/chroma"
 
 app = FastAPI()
 
@@ -44,17 +45,16 @@ def index():
 
 @app.post("/submit_query")
 def submit_query(request: SubmitQueryRequest) -> QueryResponse:
-    with RAGQuery(
-        db_path = DB_PATH,
-        model_name = "intfloat/multilingual-e5-large",
-        model_kwargs = {'device': "cpu"}
-    ) as rag:
-        return rag.query(request.query_text)
+    with RAGQuery() as Rag:
+        response = Rag.query(request.query_text)
     
 
-# @app.get("/update")
-# def update():
-#     populate()
+@app.get("/update")
+def update():
+    docs = DocumentManager().parse_documents()
+    splitted_docs = DocumentManager().split_documents(docs)
+    with ChromaDB() as db:
+        db.add(splitted_docs)
 
 # @app.get("/download")
 # async def download(data):

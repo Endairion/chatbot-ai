@@ -56,8 +56,15 @@ class DocumentManager:
         if not os.path.exists(self.old_path):
             os.makedirs(self.old_path)
 
-        for document in documents:
-            shutil.move(os.path.join(self.new_path, document.metadata["file_name"]), self.old_path)
+            files = os.listdir(self.new_path)
+    
+        for file_name in files:
+            # Construct full file path
+            full_file_name = os.path.join(self.new_path, file_name)
+            
+            if os.path.isfile(full_file_name):
+                # Move the file
+                shutil.move(full_file_name, self.old_path)
 
         return new_documents
     
@@ -91,7 +98,7 @@ class DocumentManager:
             # Wait for all download tasks to complete
             await asyncio.gather(*tasks)
 
-    async def download_pdf(self, session, url, download_path):
+    async def download_pdf(self, session: aiohttp.ClientSession, url, download_path):
         try:
             async with session.get(url) as response:
                 response.raise_for_status()  # Raise an exception for HTTP errors

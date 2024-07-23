@@ -12,15 +12,18 @@ class QueryResponse:
     sources: list[str]
 
 class RAGQuery:
-    def __init__(self, db_path: str, model_name: str, model_kwargs: dict):
-        self.db_path = db_path
-        self.embedding_function = EmbeddingFunction(model_name, model_kwargs)
-        self.db = None
+    def __init__(self):
+        self.db=None
 
     def __enter__(self):
-        with self.embedding_function as embedding_function:
-            self.db = ChromaDB(persist_directory=self.db_path, embedding_function=embedding_function)
+        with ChromaDB() as db:
+            self.db = db
+
         return self
+    
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        del self.db
+        gc.collect()
 
     def query(self, query_text: str) -> QueryResponse:
         if self.db is None:
@@ -49,8 +52,4 @@ class RAGQuery:
             sources=sources
         )
     
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        del self.db
-        del self.embedding_function
-        gc.collect()
 

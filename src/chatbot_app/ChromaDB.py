@@ -1,11 +1,23 @@
+import gc
 from langchain_community.vectorstores import Chroma
 from langchain.schema.document import Document
 
+from chatbot_app.EmbeddingFunction import EmbeddingFunction
+
 class ChromaDB:
-    def __init__(self, persist_directory: str, embedding_function):
-        self.persist_directory = persist_directory
-        self.embedding_function = embedding_function
-        self.db = Chroma(persist_directory=self.persist_directory, embedding_function=self.embedding_function)
+    def __init__(self):
+        self.persist_directory = "data/chroma"
+        self.db = None
+
+    def __enter__(self):
+        with EmbeddingFunction() as embedding_function:
+            self.db = Chroma(persist_directory=self.persist_directory, embedding_function=embedding_function)
+
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        del self.db
+        gc.collect()       
 
     def similarity_search(self, query_text: str, k: int):
         return self.db.similarity_search_with_score(query_text, k=k)
@@ -34,26 +46,26 @@ class ChromaDB:
         
 
     def calculate_chunk_ids(self, documents: list[Document]):
-        # This will create IDs like "data/monopoly.pdf:6:2"
-        # Page Source : Page Number : Chunk Index
-        last_page_id = None
-        current_chunk_index = 0
-        for doc in documents:
+        doc_chunk_counts = {}
+
+        for doc_index, doc in enumerate(documents):
             filename = doc.metadata.get('filename', 'unknown_filename')
             header = doc.metadata.get('Header 1', 'no_header')
-            current_page_id = f"{filename}:{header}"
 
-            # If the page ID is the same as the last one, increment the index.
-            if current_page_id == last_page_id:
-                current_chunk_index += 1
+            # Create a unique document ID if it doesn't exist in the dictionary
+            if filename not in doc_chunk_counts:
+                doc_chunk_counts[filename] = {}
+            
+            # Create or update the header-specific chunk index within the document
+            if header not in doc_chunk_counts[filename]:
+                doc_chunk_counts[filename][header] = 0
             else:
-                current_chunk_index = 0
+                doc_chunk_counts[filename][header] += 1
 
-            # Calculate the chunk ID.
-            chunk_id = f"{current_page_id}:{current_chunk_index}"
-            last_page_id = current_page_id
+            # Calculate the chunk ID using the filename, header, and header-specific chunk index
+            chunk_id = f"{filename}:{header}:{doc_chunk_counts[filename][header]}"
 
-            # Add it to the page meta-data.
+            # Add the chunk ID to the document metadata
             doc.metadata["id"] = chunk_id
             print(chunk_id)
 

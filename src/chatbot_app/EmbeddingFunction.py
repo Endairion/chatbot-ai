@@ -3,15 +3,13 @@ from langchain_huggingface import HuggingFaceEmbeddings
 
 
 class EmbeddingFunction:
-    def __init__(self, model_name: str, model_kwargs: dict):
-        self.model_name = model_name
-        self.model_kwargs = model_kwargs
+    def __init__(self):
         self.embedding = None
 
     def __enter__(self):
         self.embedding = HuggingFaceEmbeddings(
-            model_name=self.model_name, 
-            model_kwargs=self.model_kwargs
+            model_name="intfloat/multilingual-e5-large", 
+            model_kwargs={'device': "cpu"}
         )
         return self.embedding
     
