@@ -1,23 +1,14 @@
-import gc
 from langchain_community.vectorstores import Chroma
 from langchain.schema.document import Document
 
-from chatbot_app.EmbeddingFunction import EmbeddingFunction
-
 class ChromaDB:
-    def __init__(self):
+    def __init__(self,embedding_function):
         self.persist_directory = "data/chroma"
+        self.embedding_function = embedding_function
         self.db = None
-
-    def __enter__(self):
-        with EmbeddingFunction() as embedding_function:
-            self.db = Chroma(persist_directory=self.persist_directory, embedding_function=embedding_function)
-
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        del self.db
-        gc.collect()       
+        
+    def setup_db(self):
+        self.db = Chroma(persist_directory=self.persist_directory, embedding_function=self.embedding_function)
 
     def similarity_search(self, query_text: str, k: int):
         return self.db.similarity_search_with_score(query_text, k=k)
@@ -39,7 +30,7 @@ class ChromaDB:
         if len(new_chunks):
             print(f"Adding {len(new_chunks)} new documents to the database.")
             new_chunks_ids = [chunk.metadata["id"] for chunk in new_chunks]
-            print(new_chunks_ids)
+            # print(new_chunks_ids)
             self.db.add_documents(documents=new_chunks, ids=new_chunks_ids)
         else:
             print("No new documents to add to the database.")

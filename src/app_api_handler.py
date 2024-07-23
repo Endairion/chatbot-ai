@@ -41,8 +41,11 @@ def process_documents():
     if not docs:
         return None
     splitted_docs = DocumentManager().split_documents(docs)
-    with ChromaDB() as db:
+    with EmbeddingFunction() as embedding_function:
+        db = ChromaDB(embedding_function=embedding_function)
+        db.setup_db()
         db.add(splitted_docs)
+    return None
 
 class SubmitQueryRequest(BaseModel):
     query_text: str

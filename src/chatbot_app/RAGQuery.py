@@ -16,8 +16,9 @@ class RAGQuery:
         self.db=None
 
     def __enter__(self):
-        with ChromaDB() as db:
-            self.db = db
+        with EmbeddingFunction() as embedding_function:
+            self.db = ChromaDB(embedding_function=embedding_function)
+            self.db.setup_db()
 
         return self
     
@@ -40,8 +41,10 @@ class RAGQuery:
         
         context_text = "\n\n---\n\n".join([doc.page_content for doc, _score in results])
         with PromptTemplate(question=query_text, context=context_text) as prompt:
+            print(prompt)
             with LanguageModel(model_name="ft:gpt-3.5-turbo-0125:personal::9hUiZayg", temperature=0.7) as model:
                 response = model.generate(prompt)
+                print(response)
 
         sources = [doc.metadata.get("id", None) for doc, _score in results]
         

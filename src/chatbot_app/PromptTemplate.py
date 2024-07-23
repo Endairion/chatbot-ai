@@ -1,17 +1,18 @@
 import gc
-from langchain.prompts import ChatPromptTemplate
+
+PROMPT_TEMPLATE = """
+Answer the question based only on the following context:
+
+{context}
+
+---
+
+Answer the question based on the above context and the question's language: {question}
+"""
 
 class PromptTemplate:
     def __init__(self, question: str, context: str):
-        self.template = """
-        Answer the question based only on the following context:
-
-        {context}
-
-        ---
-
-        Answer the question based on the above context and the question's language: {question}
-        """
+        self.template = PROMPT_TEMPLATE
         self.question = question
         self.context = context
 
