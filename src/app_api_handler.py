@@ -1,15 +1,13 @@
-import asyncio
-import aiohttp
-import uvicorn
-import os
-import aiofiles
 import gc
+import uvicorn
 from pydantic import BaseModel
-from fastapi import FastAPI, Request
-from chatbot_app.query_rag import QueryResponse, query_rag
-from chatbot_app.populate_database import populate
-from chatbot_app.download_pdf import process_attachments
+from fastapi import FastAPI, BackgroundTasks
+from chatbot_app.ChromaDB import ChromaDB
+from chatbot_app.DocumentManager import DocumentManager
+from chatbot_app.EmbeddingFunction import EmbeddingFunction
+from chatbot_app.RAGQuery import RAGQuery, QueryResponse
 from starlette.middleware.cors import CORSMiddleware
+
 app = FastAPI()
 
 class GCMiddleware:
@@ -38,6 +36,17 @@ app.add_middleware(
     allow_headers=['*'],
 )
 
+def process_documents():
+    docs = DocumentManager().parse_documents()
+    if not docs:
+        return None
+    splitted_docs = DocumentManager().split_documents(docs)
+    with EmbeddingFunction() as embedding_function:
+        db = ChromaDB(embedding_function=embedding_function)
+        db.setup_db()
+        db.add(splitted_docs)
+    return None
+
 class SubmitQueryRequest(BaseModel):
     query_text: str
 
@@ -47,18 +56,19 @@ def index():
 
 @app.post("/submit_query")
 def submit_query(request: SubmitQueryRequest) -> QueryResponse:
-    response = query_rag(request.query_text)
-    collected = gc.collect()
-    print(f"Garbage collection triggered after /submit_query: {collected} objects collected")
-    return response
+    with RAGQuery() as Rag:
+        response = Rag.query(request.query_text)
+        return response
+    
 
 @app.get("/update")
-def update():
-    populate()
+def update(background_tasks: BackgroundTasks):
+    background_tasks.add_task(process_documents)
+    return {"message": "Processing started"}
 
-@app.get("/download")
-async def download(data):
-    await process_attachments(data)
+# @app.get("/download")
+# async def download(data):
+#     await process_attachments(data)
 
 
 
