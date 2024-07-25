@@ -71,14 +71,33 @@ class DocumentManager:
     def split_documents(self, documents: list[Document]):
         print("Splitting documents into chunks.")
         headers_to_split_on = [("#", "Header 1"), ("##", "Header 2"), ("###", "Header 3")]
+        split_documents = []
         splitter = MarkdownHeaderTextSplitter(
             headers_to_split_on=headers_to_split_on, 
             return_each_line=False, 
-            strip_headers=False)
-        
-        document = splitter.split_documents(documents)
+            strip_headers=False)  
 
-        return document
+        for document in documents:
+            text = document.page_content
+            initial_metadata = document.metadata
+
+            # Split the text using split_text method
+            split_content_documents = splitter.split_text(text)
+
+            # Create new Document objects with the split content and metadata
+            for chunk in split_content_documents:
+                # Access the content and metadata from the chunk Document
+                chunk_content = chunk.page_content
+                chunk_metadata = chunk.metadata
+
+                # Combine initial metadata with chunk-specific metadata
+                combined_metadata = {**initial_metadata, **chunk_metadata}
+                # Create a new Document object
+                split_document = Document(page_content=chunk_content, metadata=combined_metadata)
+                split_documents.append(split_document)
+
+
+        return split_documents
     
     async def process_attachments(self, data):
         async with aiohttp.ClientSession() as session:
