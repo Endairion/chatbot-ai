@@ -3,7 +3,7 @@ from langchain.schema.document import Document
 
 class ChromaDB:
     def __init__(self,embedding_function):
-        self.persist_directory = "data/chroma"
+        self.persist_directory = "chroma"
         self.embedding_function = embedding_function
         self.db = None
         
@@ -36,28 +36,30 @@ class ChromaDB:
             print("No new documents to add to the database.")
         
 
-    def calculate_chunk_ids(self, documents: list[Document]):
-        doc_chunk_counts = {}
+    def calculate_chunk_ids(chunks):
 
-        for doc_index, doc in enumerate(documents):
-            filename = doc.metadata.get('filename', 'unknown_filename')
-            header = doc.metadata.get('Header 1', 'no_header')
+        # This will create IDs like "data/monopoly.pdf:6:2"
+        # Page Source : Page Number : Chunk Index
 
-            # Create a unique document ID if it doesn't exist in the dictionary
-            if filename not in doc_chunk_counts:
-                doc_chunk_counts[filename] = {}
-            
-            # Create or update the header-specific chunk index within the document
-            if header not in doc_chunk_counts[filename]:
-                doc_chunk_counts[filename][header] = 0
+        last_page_id = None
+        current_chunk_index = 0
+
+        for chunk in chunks:
+            source = chunk.metadata.get("source")
+            page = chunk.metadata.get("page")
+            current_page_id = f"{source}:{page}"
+
+            # If the page ID is the same as the last one, increment the index.
+            if current_page_id == last_page_id:
+                current_chunk_index += 1
             else:
-                doc_chunk_counts[filename][header] += 1
+                current_chunk_index = 0
 
-            # Calculate the chunk ID using the filename, header, and header-specific chunk index
-            chunk_id = f"{filename}:{header}:{doc_chunk_counts[filename][header]}"
+            # Calculate the chunk ID.
+            chunk_id = f"{current_page_id}:{current_chunk_index}"
+            last_page_id = current_page_id
 
-            # Add the chunk ID to the document metadata
-            doc.metadata["id"] = chunk_id
-            print(chunk_id)
+            # Add it to the page meta-data.
+            chunk.metadata["id"] = chunk_id
 
-        return documents
+        return chunks

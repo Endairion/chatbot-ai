@@ -42,7 +42,7 @@ class RAGQuery:
         context_text = "\n\n---\n\n".join([doc.page_content for doc, _score in results])
         with PromptTemplate(question=query_text, context=context_text) as prompt:
             print(prompt)
-            with LanguageModel(model_name="ft:gpt-3.5-turbo-0125:personal::9hUiZayg", temperature=0.7) as model:
+            with LanguageModel(model_name="gpt-4o-mini", temperature=0.7) as model:
                 response = model.generate(prompt)
                 print(response)
 

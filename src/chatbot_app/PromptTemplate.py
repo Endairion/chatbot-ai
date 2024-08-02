@@ -1,13 +1,14 @@
 import gc
 
-PROMPT_TEMPLATE = """
-Answer the question based only on the following context:
+PROMPT_TEMPLATE = """You are an assistant for question-answering tasks. 
+Use the following pieces of retrieved context to answer the question. 
+If you don't know the answer, politely say that you could not answer the question and tell the user to contact for customer support.
+If you know the answer, just answer the question, don't make up an answer. 
 
-{context}
 
----
+Question: {question} 
 
-Answer the question based on the above context and the question's language: {question}
+Context: {context}
 """
 
 class PromptTemplate:
