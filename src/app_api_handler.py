@@ -60,15 +60,10 @@ def submit_query(request: SubmitQueryRequest) -> QueryResponse:
         response = Rag.query(request.query_text)
         return response
     
-
 @app.get("/update")
 def update(background_tasks: BackgroundTasks):
     background_tasks.add_task(process_documents)
     return {"message": "Processing started"}
-
-# @app.get("/download")
-# async def download(data):
-#     await process_attachments(data)
 
 
 
