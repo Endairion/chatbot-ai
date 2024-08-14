@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 import gc
+from typing import Dict, Optional, List
 from chatbot_app.PromptTemplate import PromptTemplate
 from chatbot_app.ChromaDB import ChromaDB
 from chatbot_app.EmbeddingFunction import EmbeddingFunction
@@ -9,7 +10,7 @@ from chatbot_app.LanguageModel import LanguageModel
 class QueryResponse:
     query_text: str
     response_text: str
-    sources: list[str]
+    sources: List[str]
 
 class RAGQuery:
     def __init__(self):
@@ -26,11 +27,11 @@ class RAGQuery:
         del self.db
         gc.collect()
 
-    def query(self, query_text: str) -> QueryResponse:
+    async def query(self, query_text: str, filter: Optional[Dict[str, str]] = None) -> QueryResponse:
         if self.db is None:
             raise ValueError("DB not initialized. Call setup_db() first.")
         
-        results = self.db.similarity_search(query_text, k=5)
+        results = await self.db.similarity_search(query_text, k=10, filter=filter)
         if len(results) == 0:
             print("Unable to find matching results.")
             return QueryResponse(

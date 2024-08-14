@@ -1,4 +1,5 @@
-from langchain_community.vectorstores import Chroma
+from typing import Dict, Optional
+from langchain_chroma import Chroma
 from langchain.schema.document import Document
 
 class ChromaDB:
@@ -10,8 +11,8 @@ class ChromaDB:
     def setup_db(self):
         self.db = Chroma(persist_directory=self.persist_directory, embedding_function=self.embedding_function)
 
-    def similarity_search(self, query_text: str, k: int):
-        return self.db.similarity_search_with_score(query_text, k=k)
+    async def similarity_search(self, query_text: str, k: int, filter: Optional[Dict[str, str]] = None):
+        return await self.db.asimilarity_search_with_score(query_text, k=k, filter=filter)
     
     def add(self, chunks: list[Document]):
         chunks_with_ids = self.calculate_chunk_ids(chunks)
@@ -36,7 +37,7 @@ class ChromaDB:
             print("No new documents to add to the database.")
         
 
-    def calculate_chunk_ids(chunks):
+    def calculate_chunk_ids(self,chunks):
 
         # This will create IDs like "data/monopoly.pdf:6:2"
         # Page Source : Page Number : Chunk Index
@@ -46,18 +47,11 @@ class ChromaDB:
 
         for chunk in chunks:
             source = chunk.metadata.get("source")
-            page = chunk.metadata.get("page")
-            current_page_id = f"{source}:{page}"
-
-            # If the page ID is the same as the last one, increment the index.
-            if current_page_id == last_page_id:
-                current_chunk_index += 1
-            else:
-                current_chunk_index = 0
+            current_page_id = f"{source}"
+            current_chunk_index += 1
 
             # Calculate the chunk ID.
             chunk_id = f"{current_page_id}:{current_chunk_index}"
-            last_page_id = current_page_id
 
             # Add it to the page meta-data.
             chunk.metadata["id"] = chunk_id

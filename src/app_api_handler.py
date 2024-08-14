@@ -1,4 +1,5 @@
 import gc
+from typing import Dict, Optional
 import uvicorn
 from pydantic import BaseModel
 from fastapi import FastAPI, BackgroundTasks
@@ -37,27 +38,25 @@ app.add_middleware(
 )
 
 def process_documents():
-    docs = DocumentManager().parse_documents()
-    if not docs:
-        return None
-    splitted_docs = DocumentManager().split_documents(docs)
+    docs = DocumentManager().load_documents()
     with EmbeddingFunction() as embedding_function:
         db = ChromaDB(embedding_function=embedding_function)
         db.setup_db()
-        db.add(splitted_docs)
+        db.add(docs)
     return None
 
 class SubmitQueryRequest(BaseModel):
     query_text: str
+    filter: Optional[Dict[str,str]] = None
 
 @app.get("/")
 def index():
     return {"data": "Hello World"}
 
 @app.post("/submit_query")
-def submit_query(request: SubmitQueryRequest) -> QueryResponse:
+async def submit_query(request: SubmitQueryRequest) -> QueryResponse:
     with RAGQuery() as Rag:
-        response = Rag.query(request.query_text)
+        response = await Rag.query(request.query_text, request.filter)
         return response
     
 @app.get("/update")
