@@ -1,15 +1,21 @@
 import gc
 
-PROMPT_TEMPLATE = """You are an assistant for question-answering tasks. 
-Use the following pieces of retrieved context to answer the question. 
-If you don't know the answer, politely say that you could not answer the question and tell the user to contact for customer support.
-If you know the answer, just answer the question, don't make up an answer. 
+PROMPT_TEMPLATE ="""You are an expert assistant specialized in providing detailed and accurate information based on retrieved documents. Below is the context retrieved from the relevant documents, followed by the user's question. Please provide a detailed and accurate answer.
 
+Context:
+{context}
 
-Question: {question} 
+Question:
+{question}
 
-Context: {context}
+Instructions for the Answer:
+- Provide a clear and concise answer.
+- Only answer the question using the context, don't make up an answer.
+- If you don't know the answer, politely say that you could not answer the question and tell the user to contact customer support.
+- No mentioning "According to the context above", "Based on the context above", etc.
+Answer:
 """
+
 
 class PromptTemplate:
     def __init__(self, question: str, context: str):

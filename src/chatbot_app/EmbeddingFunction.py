@@ -8,8 +8,8 @@ class EmbeddingFunction:
 
     def __enter__(self):
         self.embedding = HuggingFaceEmbeddings(
-            model_name="intfloat/multilingual-e5-large", 
-            model_kwargs={'device': "cpu"}
+            model_name="Alibaba-NLP/gte-base-en-v1.5", 
+            model_kwargs={'device': "cpu", 'trust_remote_code': True}
         )
         return self.embedding
     
