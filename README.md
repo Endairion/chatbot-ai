@@ -51,3 +51,9 @@ Response Body:
 
 For `/update`, it would update the vector database if there is new entry of documents. It would take a lot of time for the vector database to update, depends on your machine.
 
+To use the application you will still need to create API Key for `OpenAI`. First head to https://platform.openai.com/ and sign up and account or you could use any account. Head to the dashboard and create a new secret key. Save the key to an `.env` file in the folder `chatbot-ai`. API Key should look like: `sk-......`. Inside the `.env` file should look like this
+
+> OPENAI_API_KEY = sk-........
+
+It should all be working just fine by now! Anything feel free to contact me through my email or personal phone.
+
